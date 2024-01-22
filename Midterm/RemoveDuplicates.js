@@ -1,14 +1,19 @@
 function removeDups(datas) {
     let index = [];
-    for(let data of datas) {
-        for(let i = 0 ; i < datas.length ; i++) {
-            if(i == 0) {
-                index.push[data];
-            }
-            else
+    let done = true;
+    let i = 0;
+        do {
+            index.push(datas[0]);
+            done = false
         }
+        while (done);
+    for(let data of datas) {
+        if(data != datas[i--]) {
+            index.push(data);
+        }
+        i++;
     }
-    
+    return(index);
 }
 
 
