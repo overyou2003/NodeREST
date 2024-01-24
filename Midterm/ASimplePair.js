@@ -1,13 +1,5 @@
 function simplePair(numArray,num) {
-    for(let i = 0 ; i < numArray.length ; i++) {
-        for(let j = 0 ; j < numArray.length ; j++) {
-            if(i != j) {
-                if((numArray[i] * numArray[j]) == num) {
-                    
-                }
-            }
-        }
-    }
+    return null;
 }
 
 console.log(simplePair([1,2,3] , 3));

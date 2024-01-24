@@ -7,16 +7,21 @@ function removeDups(datas) {
             done = false
         }
         while (done);
-    for(let data of datas) {
-        if(data != datas[i--]) {
-            index.push(data);
+        for(let data of datas) {
+            for(let j = 0 ; j < index.length ; j++) {
+                if(data == index[j]) {
+                    i = 0;
+                    break;
+                } 
+                else if(data != index[j]) i = 1;
+            }
+            if(i == 1) {
+                index.push(data);
+            }
         }
-        i++;
-    }
     return(index);
 }
 
-
-console.log(removeDups([1,0,1,0]));
-console.log(removeDups(["The" , "big" , "cat"]));
+console.log(removeDups([1,0,1,0,1,2,3]));
+console.log(removeDups(["The" , "big" , "cat" , "cat"]));
 console.log(removeDups(["John","Taylor","John"]));
