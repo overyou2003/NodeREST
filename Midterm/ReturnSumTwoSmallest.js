@@ -1,7 +1,6 @@
 function sumTwoSmallestNums(nums) {
     let result = 0
     let count = 0
-    console.log(nums.sort((a,b) => a - b));
    
     for(let i of nums)
         if(i <  0){

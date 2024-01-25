@@ -1,11 +1,8 @@
 function numberSplit(nums) {
     result = [];
-    number = nums;
-    for(let i = 0 ; i < 2 ; i++) {
-        number /= 2;
-        result.push(number);
-    }
-    return number;
+    number = Math.floor(nums/2);
+    number1 = Math.ceil(nums/2);
+    return [number,number1];
 }
 
 console.log(numberSplit(4));
