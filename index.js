@@ -1,92 +1,87 @@
+// SQLite3 CRUD operations
+// npm install sqlite3
+// Create a Bood.sqlite file in Database folder
+// Run this file with node CRUDBookSQLite.js
+// Test with Postman
 
-
-
-
-
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const cors = require('cors');
-
-//Database connection
-mongoose.connect(
-    "mongodb://admin:LBRald64579@node57392-patiphat-noderest.proen.app.ruk-com.cloud",
-    {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    }
-);
-
-const Book = mongoose.model("Book", {
-    id: {
-        type: Number,
-        unique: true,
-        required: true,
-    },
-    title: String,
-    author: String,
-});
-
+const express = require('express');
+const sqlite3 = require('sqlite3');
 const app = express();
-app.use(bodyParser.json());
+
+// connect to database
+const db = new sqlite3.Database('./Database/Book.sqlite');
+
+// parse incoming requests
 app.use(express.json());
-app.use(cors());
-app.post("/books", async (req, res) => {
-    try {
-        const lastBook = await Book.findOne().sort({ id: -1 });
-        const nextId = lastBook ? lastBook.id + 1 : 1;
 
-        const book = new Book({
-            id: nextId,
-            ...req.body,
-        });
-        
-        await book.save();
+// create books table if it doesn't exist
+db.run(`CREATE TABLE IF NOT EXISTS BOOKS (
+    id INTEGER PRIMARY KEY,
+    title TEXT,
+    author TEXT
+)`);
+
+// route to get all books
+app.get('/books', (req, res) => {
+    db.all('SELECT * FROM books', (err, rows) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.json(rows);
+        }
+    });
+});
+
+// route to get a book by id
+app.get('/books/:id', (req, res) => {
+    db.get('SELECT * FROM books WHERE id = ?', req.params.id, (err, row) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            if (!row) {
+                res.status(404).send('Book not found');
+            } else {
+                res.json(row);
+            }
+        }
+    });
+});
+
+// route to create a new book
+app.post('/books', (req, res) => {
+    const book = req.body;
+    db.run('INSERT INTO books (title, author) VALUES (?, ?)', book.title, book.author, function(err) {
+      if (err) {
+        res.status(500).send(err);
+      } else {
+        book.id = this.lastID;
         res.send(book);
-    } catch(error) {
-        res.status(500).send(error);
-    }
+      }
+    });
 });
 
-app.get("/books", async (req, res) => {
-    try {
-        const books = await Book.find();
-        res.send(books);
-    } catch (error) {
-        res.status(500).send(error);
+// route to update a book
+app.put('/books/:id', (req, res) => {
+  const book = req.body;
+  db.run('UPDATE books SET title = ?, author = ? WHERE id = ?', book.title, book.author, req.params.id, function(err) {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.send(book);
     }
+  });
 });
 
-app.get("/books/:id" , async (req, res) => {
-    try {
-        const book = await Book.findOne({id:req.params.id});
-        res.send(book);
-    } catch(error) {
-        res.status(500).send(error);
+// 
+app.delete('/books/:id', (req, res) => {
+  db.run('DELETE FROM books WHERE id = ?', req.params.id, function(err) {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.send({});
     }
+  });
 });
 
-app.put("/books/:id", async (req, res) => {
-    try {
-        const book = await Book.findOneAndUpdate({id:req.params.id}, req.body, {
-            new: true,
-        });
-        res.send(book); 
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
-
-app.delete("/books/:id", async (req, res) => {
-    try {
-        const book = await Book.findOneAndDelete({id:req.params.id});
-        res.send(book);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server started at http://localhost:${PORT}`);
-});
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Listening on port ${port}...`));
